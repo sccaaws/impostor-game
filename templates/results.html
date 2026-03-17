@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}Results{% endblock %}
+
+{% block content %}
+  <h1>Round Results</h1>
+
+  <div class="card">
+    <div class="muted">Winner</div>
+    <div class="word">{{ winner }}</div>
+  </div>
+
+  {% if vote_result == 'tie' %}
+    <p class="error">The vote was tied, so the impostor survives and wins the round.</p>
+  {% elif vote_result == 'caught' %}
+    <p class="success">The group correctly found the impostor.</p>
+  {% elif vote_result == 'missed' %}
+    <p class="error">The group accused the wrong player.</p>
+  {% endif %}
+
+  <div class="stack">
+    <div><strong>Secret word:</strong> {{ secret_word }}</div>
+    <div><strong>Impostor:</strong> Player {{ impostor_id }}</div>
+    {% if accused_id %}
+      <div><strong>Accused player:</strong> Player {{ accused_id }}</div>
+    {% endif %}
+  </div>
+
+  <form method="post" action="{{ url_for('reset') }}" class="actions">
+    <button type="submit">Back to Setup</button>
+  </form>
+{% endblock %}

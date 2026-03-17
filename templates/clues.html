@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}Clue Round{% endblock %}
+
+{% block content %}
+  <span class="pill">Category: {{ category }}</span>
+  <h1>Clue Round</h1>
+  <p class="muted">Go around the group. Each player gives one clue about the secret word.</p>
+
+  <div class="card">
+    <h3>Turn order</h3>
+    <div class="stack">
+      {% for player in players %}
+        <div>{{ player.name }}</div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <form method="post" action="{{ url_for('start_voting') }}">
+    <button type="submit">Start Voting</button>
+  </form>
+{% endblock %}

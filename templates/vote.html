@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title %}Voting{% endblock %}
+
+{% block content %}
+  <span class="pill">Voter {{ voter_number }} of {{ total_players }}</span>
+  <h1>Cast Your Vote</h1>
+  <p class="muted">Choose who you think the impostor is.</p>
+
+  {% if error %}
+    <div class="error">{{ error }}</div>
+  {% endif %}
+
+  <form method="post">
+    <div class="player-list">
+      {% for player in players %}
+        <button type="submit" name="voted_for" value="{{ player.id }}">{{ player.name }}</button>
+      {% endfor %}
+    </div>
+  </form>
+{% endblock %}

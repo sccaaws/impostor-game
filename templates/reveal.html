@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}Reveal Role{% endblock %}
+
+{% block head %}
+<script>
+  function toggleRole() {
+    const roleCard = document.getElementById('role-card');
+    const revealButton = document.getElementById('reveal-button');
+    const isHidden = roleCard.hasAttribute('hidden');
+
+    if (isHidden) {
+      roleCard.removeAttribute('hidden');
+      revealButton.textContent = 'Hide Role';
+    } else {
+      roleCard.setAttribute('hidden', 'hidden');
+      revealButton.textContent = 'Reveal Role';
+    }
+  }
+</script>
+{% endblock %}
+
+{% block content %}
+  <div class="center">
+    <span class="pill">Player {{ player_number }} of {{ total_players }}</span>
+    <h1>Secret Role Reveal</h1>
+    <p class="muted">Make sure only this player can see the screen before revealing the role.</p>
+  </div>
+
+  <div class="progress">
+    <div class="progress-bar" style="width: {{ (player_number / total_players) * 100 }}%"></div>
+  </div>
+
+  <div class="actions">
+    <button id="reveal-button" type="button" onclick="toggleRole()">Reveal Role</button>
+  </div>
+  <p></p>
+
+  <div id="role-card" class="card center" hidden>
+    {% if is_impostor %}
+      <h2>You are the Impostor</h2>
+      <p class="muted">You do not know the word. Listen closely to clues and try to blend in.</p>
+    {% else %}
+      <h2>Your secret word is:</h2>
+      <div class="word">{{ secret_word }}</div>
+      <p class="muted">Remember it and keep it secret.</p>
+    {% endif %}
+  </div>
+
+  <form method="post" action="{{ url_for('next_reveal', player_number=player_number) }}">
+    <button type="submit">
+      {% if player_number < total_players %}
+        Pass to Player {{ player_number + 1 }}
+      {% else %}
+        Continue to Clue Round
+      {% endif %}
+    </button>
+  </form>
+{% endblock %}

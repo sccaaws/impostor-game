@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}Impostor Game{% endblock %}
+
+{% block content %}
+  <h1>Impostor Game</h1>
+  <p class="muted">Create a pass-and-play round with one hidden impostor.</p>
+
+  <form method="post" class="stack">
+    <div>
+      <label for="player_count">Number of players</label>
+      <input id="player_count" type="number" name="player_count" min="3" max="12" value="4" required>
+    </div>
+
+    <div>
+      <label for="category">Category</label>
+      <select id="category" name="category">
+        {% for category in categories %}
+          <option value="{{ category }}">{{ category }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    {% if error %}
+      <div class="error">{{ error }}</div>
+    {% endif %}
+
+    <button type="submit">Start Game</button>
+  </form>
+{% endblock %}
