@@ -23,8 +23,8 @@ def default_player_names(player_count: int) -> list[str]:
 
 def get_cached_names(player_count: int) -> list[str]:
     cached_names = session.get("cached_player_names", [])
-
     names = []
+
     for i in range(player_count):
         if i < len(cached_names) and cached_names[i].strip():
             names.append(cached_names[i].strip())
@@ -34,6 +34,22 @@ def get_cached_names(player_count: int) -> list[str]:
     return names
 
 
+def create_scoreboard(player_names: list[str]) -> dict:
+    return {
+        "rounds_played": 0,
+        "crewmate_wins": 0,
+        "impostor_wins": 0,
+        "player_stats": [
+            {
+                "id": i + 1,
+                "name": player_names[i],
+                "times_impostor": 0,
+            }
+            for i in range(len(player_names))
+        ],
+    }
+
+
 def create_game(player_names: list[str], category: str) -> dict:
     player_count = len(player_names)
     players = [
@@ -41,7 +57,7 @@ def create_game(player_names: list[str], category: str) -> dict:
         for i in range(player_count)
     ]
 
-    secret_word = random.choice(WORDS[category])
+    secret_word = choose_secret_word(category)
     impostor_id = random.randint(1, player_count)
 
     return {
@@ -55,11 +71,77 @@ def create_game(player_names: list[str], category: str) -> dict:
         "accused_id": None,
         "winner": None,
         "vote_result": None,
+        "score_updated": False,
     }
+
+
+def start_new_round(player_names: list[str], category: str):
+    game = create_game(player_names, category)
+    session["game"] = game
+
+    scoreboard = session.get("scoreboard")
+    if scoreboard:
+        for player in scoreboard["player_stats"]:
+            if player["id"] == game["impostor_id"]:
+                player["times_impostor"] += 1
+                break
+        session["scoreboard"] = scoreboard
 
 
 def get_game():
     return session.get("game")
+
+
+def update_scoreboard_if_needed(game: dict):
+    if game.get("score_updated"):
+        return
+
+    scoreboard = session.get("scoreboard")
+    if not scoreboard or not game.get("winner"):
+        return
+
+    scoreboard["rounds_played"] += 1
+
+    if game["winner"] == "Crewmates":
+        scoreboard["crewmate_wins"] += 1
+    elif game["winner"] == "Impostor":
+        scoreboard["impostor_wins"] += 1
+
+    session["scoreboard"] = scoreboard
+    game["score_updated"] = True
+    session["game"] = game
+
+def get_used_words_by_category() -> dict:
+    return session.get("used_words_by_category", {})
+
+
+def save_used_word(category: str, word: str):
+    used_words_by_category = get_used_words_by_category()
+    used_words = used_words_by_category.get(category, [])
+
+    used_words.append(word)
+    used_words = used_words[-5:]
+
+    used_words_by_category[category] = used_words
+    session["used_words_by_category"] = used_words_by_category
+
+
+def choose_secret_word(category: str) -> str:
+    all_words = WORDS[category]
+    used_words_by_category = get_used_words_by_category()
+    used_words = used_words_by_category.get(category, [])
+
+    available_words = [word for word in all_words if word not in used_words]
+
+    if not available_words:
+        used_words = []
+        used_words_by_category[category] = used_words
+        session["used_words_by_category"] = used_words_by_category
+        available_words = all_words[:]
+
+    secret_word = random.choice(available_words)
+    save_used_word(category, secret_word)
+    return secret_word
 
 
 @app.route("/", methods=["GET", "POST"])
@@ -117,7 +199,9 @@ def lobby():
             player_names.append(name)
 
         session["cached_player_names"] = player_names
-        session["game"] = create_game(player_names, category)
+        session["scoreboard"] = create_scoreboard(player_names)
+        start_new_round(player_names, category)
+
         session.pop("setup", None)
         return redirect(url_for("reveal", player_number=1))
 
@@ -140,6 +224,21 @@ def reset_names():
     player_count = setup["player_count"]
     session["cached_player_names"] = default_player_names(player_count)
     return redirect(url_for("lobby"))
+
+
+@app.route("/play_again", methods=["POST"])
+def play_again():
+    game = get_game()
+    scoreboard = session.get("scoreboard")
+
+    if not game or not scoreboard:
+        return redirect(url_for("index"))
+
+    player_names = [player["name"] for player in game["players"]]
+    category = game["category"]
+
+    start_new_round(player_names, category)
+    return redirect(url_for("reveal", player_number=1))
 
 
 @app.route("/reveal/<int:player_number>")
@@ -167,6 +266,25 @@ def reveal(player_number: int):
     )
 
 
+@app.route("/pass/<int:player_number>")
+def pass_screen(player_number: int):
+    game = get_game()
+    if not game:
+        return redirect(url_for("index"))
+
+    if player_number > game["player_count"]:
+        return redirect(url_for("clues"))
+
+    current_player = game["players"][player_number - 1]
+
+    return render_template(
+        "pass.html",
+        player_number=player_number,
+        player_name=current_player["name"],
+        total_players=game["player_count"],
+    )
+
+
 @app.route("/next_reveal/<int:player_number>", methods=["POST"])
 def next_reveal(player_number: int):
     game = get_game()
@@ -182,7 +300,8 @@ def next_reveal(player_number: int):
 
     if next_player > game["player_count"]:
         return redirect(url_for("clues"))
-    return redirect(url_for("reveal", player_number=next_player))
+
+    return redirect(url_for("pass_screen", player_number=next_player))
 
 
 @app.route("/clues")
@@ -328,6 +447,8 @@ def results():
     if not game:
         return redirect(url_for("index"))
 
+    update_scoreboard_if_needed(game)
+
     return render_template(
         "results.html",
         winner=game["winner"],
@@ -336,6 +457,7 @@ def results():
         accused_id=game["accused_id"],
         vote_result=game["vote_result"],
         players=game["players"],
+        scoreboard=session.get("scoreboard"),
     )
 
 
@@ -343,6 +465,8 @@ def results():
 def reset():
     session.pop("game", None)
     session.pop("setup", None)
+    session.pop("scoreboard", None)
+    session.pop("used_words_by_category", None)
     return redirect(url_for("index"))
 
 

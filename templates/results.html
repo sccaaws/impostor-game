@@ -36,7 +36,31 @@
     {% endif %}
   </div>
 
-  <form method="post" action="{{ url_for('reset') }}" class="actions">
-    <button type="submit">Back to Setup</button>
-  </form>
+  {% if scoreboard %}
+    <div class="card">
+      <h2>Scoreboard</h2>
+      <div class="stack">
+        <div><strong>Rounds played:</strong> {{ scoreboard.rounds_played }}</div>
+        <div><strong>Crewmate wins:</strong> {{ scoreboard.crewmate_wins }}</div>
+        <div><strong>Impostor wins:</strong> {{ scoreboard.impostor_wins }}</div>
+      </div>
+
+      <h3 style="margin-top: 20px;">Player Stats</h3>
+      <div class="stack">
+        {% for stat in scoreboard.player_stats %}
+          <div>{{ stat.name }} — Times as impostor: {{ stat.times_impostor }}</div>
+        {% endfor %}
+      </div>
+    </div>
+  {% endif %}
+
+  <div class="actions">
+    <form method="post" action="{{ url_for('play_again') }}">
+      <button type="submit" class="button-primary">Play Again</button>
+    </form>
+
+    <form method="post" action="{{ url_for('reset') }}">
+      <button type="submit">Back to Setup</button>
+    </form>
+  </div>
 {% endblock %}

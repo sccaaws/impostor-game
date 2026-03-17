@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}Pass to Next Player{% endblock %}
+
+{% block content %}
+  <div class="center">
+    <span class="pill">Next Player</span>
+    <h1>Pass the Device</h1>
+    <p class="muted">Hand the device to the next player without letting anyone else look.</p>
+  </div>
+
+  <div class="card center">
+    <h2>{{ player_name }}, get ready</h2>
+    <p class="muted">
+      When the device is in your hands and no one else is looking, tap the button below.
+    </p>
+  </div>
+
+  <form method="get" action="{{ url_for('reveal', player_number=player_number) }}">
+    <button type="submit" class="button-primary">I'm Ready</button>
+  </form>
+{% endblock %}
