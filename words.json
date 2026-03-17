@@ -1,0 +1,34 @@
+{
+  "Food": [
+    "Pizza",
+    "Sushi",
+    "Burger",
+    "Pasta",
+    "Taco",
+    "Ice Cream"
+  ],
+  "Animals": [
+    "Elephant",
+    "Tiger",
+    "Dolphin",
+    "Penguin",
+    "Giraffe",
+    "Wolf"
+  ],
+  "Places": [
+    "Beach",
+    "Airport",
+    "Museum",
+    "Library",
+    "Restaurant",
+    "School"
+  ],
+  "Jobs": [
+    "Doctor",
+    "Teacher",
+    "Chef",
+    "Pilot",
+    "Farmer",
+    "Designer"
+  ]
+}

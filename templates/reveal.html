@@ -5,16 +5,16 @@
 {% block head %}
 <script>
   function toggleRole() {
-    const roleCard = document.getElementById('role-card');
-    const revealButton = document.getElementById('reveal-button');
-    const isHidden = roleCard.hasAttribute('hidden');
+    const roleCard = document.getElementById("role-card");
+    const revealButton = document.getElementById("reveal-button");
+    const isHidden = roleCard.hasAttribute("hidden");
 
     if (isHidden) {
-      roleCard.removeAttribute('hidden');
-      revealButton.textContent = 'Hide Role';
+      roleCard.removeAttribute("hidden");
+      revealButton.textContent = "Hide Role";
     } else {
-      roleCard.setAttribute('hidden', 'hidden');
-      revealButton.textContent = 'Reveal Role';
+      roleCard.setAttribute("hidden", "hidden");
+      revealButton.textContent = "Reveal Role";
     }
   }
 </script>
@@ -23,7 +23,7 @@
 {% block content %}
   <div class="center">
     <span class="pill">Player {{ player_number }} of {{ total_players }}</span>
-    <h1>Secret Role Reveal</h1>
+    <h1>{{ player_name }}'s Turn</h1>
     <p class="muted">Make sure only this player can see the screen before revealing the role.</p>
   </div>
 
@@ -34,7 +34,6 @@
   <div class="actions">
     <button id="reveal-button" type="button" onclick="toggleRole()">Reveal Role</button>
   </div>
-  <p></p>
 
   <div id="role-card" class="card center" hidden>
     {% if is_impostor %}
@@ -50,7 +49,7 @@
   <form method="post" action="{{ url_for('next_reveal', player_number=player_number) }}">
     <button type="submit">
       {% if player_number < total_players %}
-        Pass to Player {{ player_number + 1 }}
+        Pass to Next Player
       {% else %}
         Continue to Clue Round
       {% endif %}

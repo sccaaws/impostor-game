@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Lobby{% endblock %}
+
+{% block content %}
+  <span class="pill">Category: {{ category }}</span>
+  <h1>Lobby</h1>
+  <p class="muted">Enter player names before starting the round.</p>
+
+  <div class="card">
+    <div class="lobby-summary">
+      <div><strong>Players:</strong> {{ player_count }}</div>
+      <div><strong>Category:</strong> {{ category }}</div>
+    </div>
+  </div>
+
+  <form method="post" class="stack">
+    {% for name in player_names %}
+      <div>
+        <label for="player_{{ loop.index }}">Player {{ loop.index }} name</label>
+        <input
+          id="player_{{ loop.index }}"
+          type="text"
+          name="player_{{ loop.index }}"
+          value="{{ name }}"
+          maxlength="30"
+          required
+        >
+      </div>
+    {% endfor %}
+
+    <div class="actions">
+      <button type="submit" class="button-primary">Start Game</button>
+    </div>
+  </form>
+
+  <div class="actions">
+    <form method="post" action="{{ url_for('reset_names') }}">
+      <button type="submit" class="button-secondary">Reset Names</button>
+    </form>
+
+    <a class="link-button" href="{{ url_for('index') }}">Back to Setup</a>
+  </div>
+{% endblock %}

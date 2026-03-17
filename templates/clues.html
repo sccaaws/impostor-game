@@ -11,7 +11,7 @@
     <h3>Turn order</h3>
     <div class="stack">
       {% for player in players %}
-        <div>{{ player.name }}</div>
+        <div>{{ loop.index }}. {{ player.name }}</div>
       {% endfor %}
     </div>
   </div>

@@ -20,9 +20,19 @@
 
   <div class="stack">
     <div><strong>Secret word:</strong> {{ secret_word }}</div>
-    <div><strong>Impostor:</strong> Player {{ impostor_id }}</div>
+
+    {% for player in players %}
+      {% if player.id == impostor_id %}
+        <div><strong>Impostor:</strong> {{ player.name }}</div>
+      {% endif %}
+    {% endfor %}
+
     {% if accused_id %}
-      <div><strong>Accused player:</strong> Player {{ accused_id }}</div>
+      {% for player in players %}
+        {% if player.id == accused_id %}
+          <div><strong>Accused player:</strong> {{ player.name }}</div>
+        {% endif %}
+      {% endfor %}
     {% endif %}
   </div>
 

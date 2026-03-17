@@ -4,7 +4,7 @@
 
 {% block content %}
   <h1>Impostor Game</h1>
-  <p class="muted">Create a pass-and-play round with one hidden impostor.</p>
+  <p class="muted">Set up the round first, then add player names in the lobby.</p>
 
   <form method="post" class="stack">
     <div>
@@ -25,6 +25,6 @@
       <div class="error">{{ error }}</div>
     {% endif %}
 
-    <button type="submit">Start Game</button>
+    <button type="submit">Continue to Lobby</button>
   </form>
 {% endblock %}

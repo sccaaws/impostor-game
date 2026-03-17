@@ -5,10 +5,17 @@
   --text: #152033;
   --muted: #5b6b84;
   --border: #dbe3ee;
-  --primary: #1f6feb;
-  --primary-dark: #1859bc;
+
+  /* Colors */
+  --green: #16a34a;
+  --green-dark: #15803d;
+
+  --blue: #1f6feb;
+  --blue-dark: #1859bc;
+
   --danger: #b42318;
   --success: #067647;
+
   --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
   --radius: 18px;
 }
@@ -78,20 +85,49 @@ select {
 
 button {
   border: none;
-  background: var(--primary);
+  background: var(--blue);
   color: white;
   cursor: pointer;
   font-weight: 700;
 }
 
 button:hover {
-  background: var(--primary-dark);
+  background: var(--blue-dark);
 }
 
-.button-secondary {
-  background: white;
-  color: var(--text);
-  border: 1px solid var(--border);
+.button-primary {
+  background: var(--green);
+}
+
+.button-primary:hover {
+  background: var(--green-dark);
+}
+
+/* .button-secondary {
+  background: var(--blue);
+  color: white;
+  border: none;
+}
+
+.button-secondary:hover {
+  background: var(--blue-dark);
+} */
+
+.link-button {
+  display: inline-block;
+  width: 100%;
+  text-align: center;
+  text-decoration: none;
+  padding: 12px 14px;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 700;
+  background: var(--blue);
+  color: white;
+}
+
+.link-button:hover {
+  background: var(--blue-dark);
 }
 
 .error {
@@ -137,7 +173,7 @@ button:hover {
 
 .progress-bar {
   height: 100%;
-  background: var(--primary);
+  background: var(--blue);
 }
 
 .actions {
@@ -148,6 +184,11 @@ button:hover {
 
 .center {
   text-align: center;
+}
+
+.lobby-summary {
+  display: grid;
+  gap: 8px;
 }
 
 @media (max-width: 640px) {
