@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}Confirm Vote{% endblock %}
+
+{% block content %}
+  <div class="center">
+    <span class="pill">Confirm Vote</span>
+    <h1>{{ voter_name }}, check your choice</h1>
+  </div>
+
+  <div class="card center">
+    <p class="muted">You selected:</p>
+    <div class="word">{{ voted_player.name }}</div>
+  </div>
+
+  <div class="actions">
+    <form method="post">
+      <button type="submit" class="button-primary">Confirm Vote</button>
+    </form>
+
+    <form method="get" action="{{ url_for('vote', voter_number=voter_number) }}">
+      <button type="submit">Go Back</button>
+    </form>
+  </div>
+{% endblock %}

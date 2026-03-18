@@ -331,7 +331,29 @@ def start_voting():
         player["vote"] = None
 
     session["game"] = game
-    return redirect(url_for("vote", voter_number=1))
+    return redirect(url_for("vote_pass_screen", voter_number=1))
+
+
+@app.route("/vote_pass/<int:voter_number>")
+def vote_pass_screen(voter_number: int):
+    game = get_game()
+    if not game:
+        return redirect(url_for("index"))
+
+    if voter_number > game["player_count"]:
+        return redirect(url_for("count_votes"))
+
+    if voter_number != game["current_vote"]:
+        return redirect(url_for("vote_pass_screen", voter_number=game["current_vote"]))
+
+    current_voter = game["players"][voter_number - 1]
+
+    return render_template(
+        "vote_pass.html",
+        voter_number=voter_number,
+        voter_name=current_voter["name"],
+        total_players=game["player_count"],
+    )
 
 
 @app.route("/vote/<int:voter_number>", methods=["GET", "POST"])
@@ -341,7 +363,7 @@ def vote(voter_number: int):
         return redirect(url_for("index"))
 
     if voter_number != game["current_vote"]:
-        return redirect(url_for("vote", voter_number=game["current_vote"]))
+        return redirect(url_for("vote_pass_screen", voter_number=game["current_vote"]))
 
     current_voter = game["players"][voter_number - 1]
 
@@ -349,26 +371,73 @@ def vote(voter_number: int):
         try:
             voted_for = int(request.form["voted_for"])
         except (KeyError, ValueError):
+            eligible_players = [
+                player for player in game["players"] if player["id"] != current_voter["id"]
+            ]
             return render_template(
                 "vote.html",
                 voter_number=voter_number,
                 voter_name=current_voter["name"],
                 total_players=game["player_count"],
-                players=game["players"],
+                players=eligible_players,
                 error="Choose a valid player.",
             )
 
-        valid_ids = {player["id"] for player in game["players"]}
+        valid_ids = {
+            player["id"] for player in game["players"]
+            if player["id"] != current_voter["id"]
+        }
+
         if voted_for not in valid_ids:
+            eligible_players = [
+                player for player in game["players"] if player["id"] != current_voter["id"]
+            ]
             return render_template(
                 "vote.html",
                 voter_number=voter_number,
                 voter_name=current_voter["name"],
                 total_players=game["player_count"],
-                players=game["players"],
-                error="Choose a valid player.",
+                players=eligible_players,
+                error="You cannot vote for yourself.",
             )
 
+        return redirect(url_for("confirm_vote", voter_number=voter_number, voted_for=voted_for))
+
+    eligible_players = [
+        player for player in game["players"] if player["id"] != current_voter["id"]
+    ]
+
+    return render_template(
+        "vote.html",
+        voter_number=voter_number,
+        voter_name=current_voter["name"],
+        total_players=game["player_count"],
+        players=eligible_players,
+        error=None,
+    )
+
+
+@app.route("/confirm_vote/<int:voter_number>/<int:voted_for>", methods=["GET", "POST"])
+def confirm_vote(voter_number: int, voted_for: int):
+    game = get_game()
+    if not game:
+        return redirect(url_for("index"))
+
+    if voter_number != game["current_vote"]:
+        return redirect(url_for("vote_pass_screen", voter_number=game["current_vote"]))
+
+    current_voter = game["players"][voter_number - 1]
+    valid_ids = {
+        player["id"] for player in game["players"]
+        if player["id"] != current_voter["id"]
+    }
+
+    if voted_for not in valid_ids:
+        return redirect(url_for("vote", voter_number=voter_number))
+
+    voted_player = next(player for player in game["players"] if player["id"] == voted_for)
+
+    if request.method == "POST":
         game["players"][voter_number - 1]["vote"] = voted_for
         next_voter = voter_number + 1
         game["current_vote"] = next_voter
@@ -376,17 +445,16 @@ def vote(voter_number: int):
 
         if next_voter > game["player_count"]:
             return redirect(url_for("count_votes"))
-        return redirect(url_for("vote", voter_number=next_voter))
+
+        return redirect(url_for("vote_pass_screen", voter_number=next_voter))
 
     return render_template(
-        "vote.html",
+        "confirm_vote.html",
         voter_number=voter_number,
         voter_name=current_voter["name"],
+        voted_player=voted_player,
         total_players=game["player_count"],
-        players=game["players"],
-        error=None,
     )
-
 
 @app.route("/count_votes")
 def count_votes():

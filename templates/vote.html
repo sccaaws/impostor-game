@@ -5,7 +5,7 @@
 {% block content %}
   <span class="pill">Voter {{ voter_number }} of {{ total_players }}</span>
   <h1>{{ voter_name }}, cast your vote</h1>
-  <p class="muted">Choose who you think the impostor is.</p>
+  <p class="muted">Choose who you think the impostor is. You cannot vote for yourself.</p>
 
   {% if error %}
     <div class="error">{{ error }}</div>

@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}Pass to Voter{% endblock %}
+
+{% block content %}
+  <div class="center">
+    <span class="pill">Voting</span>
+    <h1>Pass the Device</h1>
+    <p class="muted">Hand the device to the next voter without letting anyone else look.</p>
+  </div>
+
+  <div class="card center">
+    <h2>{{ voter_name }}, get ready to vote</h2>
+    <p class="muted">
+      When only you can see the screen, tap the button below.
+    </p>
+  </div>
+
+  <form method="get" action="{{ url_for('vote', voter_number=voter_number) }}">
+    <button type="submit" class="button-primary">I'm Ready to Vote</button>
+  </form>
+{% endblock %}
