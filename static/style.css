@@ -270,3 +270,34 @@ button:hover {
 .subtle-box {
   padding: 32px 20px;
 }
+
+.stats-table {
+  display: grid;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.stats-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface-soft);
+  align-items: center;
+}
+
+.stats-header {
+  font-weight: 700;
+  background: transparent;
+  border: none;
+  padding: 0 2px 6px;
+}
+
+@media (max-width: 640px) {
+  .stats-row {
+    grid-template-columns: 1.5fr 1fr 1fr 1fr 1fr;
+    font-size: 14px;
+  }
+}
