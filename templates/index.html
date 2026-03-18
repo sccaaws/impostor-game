@@ -21,6 +21,14 @@
       </select>
     </div>
 
+    <div>
+      <label for="difficulty">Difficulty</label>
+      <select id="difficulty" name="difficulty">
+        <option value="easy">Easy</option>
+        <option value="hard">Hard</option>
+      </select>
+    </div>
+
     {% if error %}
       <div class="error">{{ error }}</div>
     {% endif %}

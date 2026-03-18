@@ -17,6 +17,18 @@ def load_words() -> dict:
 WORDS = load_words()
 
 
+def get_categories() -> list[str]:
+    return list(WORDS.keys())
+
+
+def get_difficulties() -> list[str]:
+    return ["easy", "hard"]
+
+
+def get_words_for(category: str, difficulty: str) -> list[str]:
+    return WORDS[category][difficulty]
+
+
 def default_player_names(player_count: int) -> list[str]:
     return [f"Player {i}" for i in range(1, player_count + 1)]
 
@@ -50,14 +62,14 @@ def create_scoreboard(player_names: list[str]) -> dict:
     }
 
 
-def create_game(player_names: list[str], category: str) -> dict:
+def create_game(player_names: list[str], category: str, difficulty: str) -> dict:
     player_count = len(player_names)
     players = [
         {"id": i + 1, "name": player_names[i].strip(), "vote": None}
         for i in range(player_count)
     ]
 
-    secret_word = choose_secret_word(category)
+    secret_word = choose_secret_word(category, difficulty)
     impostor_id = random.randint(1, player_count)
 
     return {
@@ -72,11 +84,12 @@ def create_game(player_names: list[str], category: str) -> dict:
         "winner": None,
         "vote_result": None,
         "score_updated": False,
+        "difficulty": difficulty,
     }
 
 
-def start_new_round(player_names: list[str], category: str):
-    game = create_game(player_names, category)
+def start_new_round(player_names: list[str], category: str, difficulty: str):
+    game = create_game(player_names, category, difficulty)
     session["game"] = game
 
     scoreboard = session.get("scoreboard")
@@ -111,36 +124,38 @@ def update_scoreboard_if_needed(game: dict):
     game["score_updated"] = True
     session["game"] = game
 
-def get_used_words_by_category() -> dict:
-    return session.get("used_words_by_category", {})
+
+def get_used_words_by_key() -> dict:
+    return session.get("used_words_by_key", {})
 
 
-def save_used_word(category: str, word: str):
-    used_words_by_category = get_used_words_by_category()
-    used_words = used_words_by_category.get(category, [])
+def save_used_word(category: str, difficulty: str, word: str):
+    used_words_by_key = get_used_words_by_key()
+    key = f"{category}:{difficulty}"
+    used_words = used_words_by_key.get(key, [])
 
     used_words.append(word)
     used_words = used_words[-5:]
 
-    used_words_by_category[category] = used_words
-    session["used_words_by_category"] = used_words_by_category
+    used_words_by_key[key] = used_words
+    session["used_words_by_key"] = used_words_by_key
 
 
-def choose_secret_word(category: str) -> str:
-    all_words = WORDS[category]
-    used_words_by_category = get_used_words_by_category()
-    used_words = used_words_by_category.get(category, [])
+def choose_secret_word(category: str, difficulty: str) -> str:
+    all_words = get_words_for(category, difficulty)
+    used_words_by_key = get_used_words_by_key()
+    key = f"{category}:{difficulty}"
+    used_words = used_words_by_key.get(key, [])
 
     available_words = [word for word in all_words if word not in used_words]
 
     if not available_words:
-        used_words = []
-        used_words_by_category[category] = used_words
-        session["used_words_by_category"] = used_words_by_category
+        used_words_by_key[key] = []
+        session["used_words_by_key"] = used_words_by_key
         available_words = all_words[:]
 
     secret_word = random.choice(available_words)
-    save_used_word(category, secret_word)
+    save_used_word(category, difficulty, secret_word)
     return secret_word
 
 
@@ -149,10 +164,18 @@ def index():
     if request.method == "POST":
         try:
             player_count = int(request.form["player_count"])
+            difficulty = request.form.get("difficulty", "easy")
+
+            if difficulty not in get_difficulties():
+                return render_template(
+                    "index.html",
+                    categories=get_categories(),
+                    error="Choose a valid difficulty.",
+                )
         except (KeyError, ValueError):
             return render_template(
                 "index.html",
-                categories=WORDS.keys(),
+                categories=get_categories(),
                 error="Enter a valid number of players.",
             )
 
@@ -161,24 +184,25 @@ def index():
         if player_count < 3 or player_count > 12:
             return render_template(
                 "index.html",
-                categories=WORDS.keys(),
+                categories=get_categories(),
                 error="Choose between 3 and 12 players.",
             )
 
         if category not in WORDS:
             return render_template(
                 "index.html",
-                categories=WORDS.keys(),
+                categories=get_categories(),
                 error="Choose a valid category.",
             )
 
         session["setup"] = {
             "player_count": player_count,
             "category": category,
+            "difficulty": difficulty,
         }
         return redirect(url_for("lobby"))
 
-    return render_template("index.html", categories=WORDS.keys(), error=None)
+    return render_template("index.html", categories=get_categories(), error=None)
 
 
 @app.route("/lobby", methods=["GET", "POST"])
@@ -190,6 +214,8 @@ def lobby():
     player_count = setup["player_count"]
     category = setup["category"]
 
+    difficulty = setup["difficulty"]
+
     if request.method == "POST":
         player_names = []
         for i in range(1, player_count + 1):
@@ -200,7 +226,7 @@ def lobby():
 
         session["cached_player_names"] = player_names
         session["scoreboard"] = create_scoreboard(player_names)
-        start_new_round(player_names, category)
+        start_new_round(player_names, category, difficulty)
 
         session.pop("setup", None)
         return redirect(url_for("reveal", player_number=1))
@@ -211,6 +237,7 @@ def lobby():
         "lobby.html",
         player_count=player_count,
         category=category,
+        difficulty=difficulty,
         player_names=cached_or_default_names,
     )
 
@@ -236,8 +263,9 @@ def play_again():
 
     player_names = [player["name"] for player in game["players"]]
     category = game["category"]
+    difficulty = game["difficulty"]
 
-    start_new_round(player_names, category)
+    start_new_round(player_names, category, difficulty)
     return redirect(url_for("reveal", player_number=1))
 
 
@@ -317,6 +345,7 @@ def clues():
         "clues.html",
         players=game["players"],
         category=game["category"],
+        difficulty=game["difficulty"],
     )
 
 
@@ -372,7 +401,9 @@ def vote(voter_number: int):
             voted_for = int(request.form["voted_for"])
         except (KeyError, ValueError):
             eligible_players = [
-                player for player in game["players"] if player["id"] != current_voter["id"]
+                player
+                for player in game["players"]
+                if player["id"] != current_voter["id"]
             ]
             return render_template(
                 "vote.html",
@@ -384,13 +415,16 @@ def vote(voter_number: int):
             )
 
         valid_ids = {
-            player["id"] for player in game["players"]
+            player["id"]
+            for player in game["players"]
             if player["id"] != current_voter["id"]
         }
 
         if voted_for not in valid_ids:
             eligible_players = [
-                player for player in game["players"] if player["id"] != current_voter["id"]
+                player
+                for player in game["players"]
+                if player["id"] != current_voter["id"]
             ]
             return render_template(
                 "vote.html",
@@ -401,7 +435,9 @@ def vote(voter_number: int):
                 error="You cannot vote for yourself.",
             )
 
-        return redirect(url_for("confirm_vote", voter_number=voter_number, voted_for=voted_for))
+        return redirect(
+            url_for("confirm_vote", voter_number=voter_number, voted_for=voted_for)
+        )
 
     eligible_players = [
         player for player in game["players"] if player["id"] != current_voter["id"]
@@ -428,14 +464,17 @@ def confirm_vote(voter_number: int, voted_for: int):
 
     current_voter = game["players"][voter_number - 1]
     valid_ids = {
-        player["id"] for player in game["players"]
+        player["id"]
+        for player in game["players"]
         if player["id"] != current_voter["id"]
     }
 
     if voted_for not in valid_ids:
         return redirect(url_for("vote", voter_number=voter_number))
 
-    voted_player = next(player for player in game["players"] if player["id"] == voted_for)
+    voted_player = next(
+        player for player in game["players"] if player["id"] == voted_for
+    )
 
     if request.method == "POST":
         game["players"][voter_number - 1]["vote"] = voted_for
@@ -456,6 +495,7 @@ def confirm_vote(voter_number: int, voted_for: int):
         total_players=game["player_count"],
     )
 
+
 @app.route("/count_votes")
 def count_votes():
     game = get_game()
@@ -466,7 +506,7 @@ def count_votes():
     counts = Counter(votes)
 
     if not counts:
-        return redirect(url_for("vote", voter_number=1))
+        return redirect(url_for("vote_pass_screen", voter_number=1))
 
     top_votes = max(counts.values())
     leaders = [player_id for player_id, count in counts.items() if count == top_votes]
@@ -502,7 +542,9 @@ def guess_word():
 
     if request.method == "POST":
         guess = request.form.get("guess", "").strip().lower()
-        game["winner"] = "Impostor" if guess == game["secret_word"].lower() else "Crewmates"
+        game["winner"] = (
+            "Impostor" if guess == game["secret_word"].lower() else "Crewmates"
+        )
         session["game"] = game
         return redirect(url_for("results"))
 
@@ -534,7 +576,7 @@ def reset():
     session.pop("game", None)
     session.pop("setup", None)
     session.pop("scoreboard", None)
-    session.pop("used_words_by_category", None)
+    session.pop("used_words_by_key", None)
     return redirect(url_for("index"))
 
 
