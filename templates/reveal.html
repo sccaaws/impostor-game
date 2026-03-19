@@ -7,13 +7,16 @@
   function toggleRole() {
     const roleCard = document.getElementById("role-card");
     const revealButton = document.getElementById("reveal-button");
+    const passForm = document.getElementById("pass-form");
     const isHidden = roleCard.hasAttribute("hidden");
 
     if (isHidden) {
       roleCard.removeAttribute("hidden");
+      passForm.removeAttribute("hidden");
       revealButton.textContent = "Hide Role";
     } else {
       roleCard.setAttribute("hidden", "hidden");
+      passForm.setAttribute("hidden", "hidden");
       revealButton.textContent = "Reveal Role";
     }
   }
@@ -34,7 +37,12 @@
   <div class="actions">
     <button id="reveal-button" type="button" onclick="toggleRole()">Reveal Role</button>
 
-    <form method="post" action="{{ url_for('next_reveal', player_number=player_number) }}">
+    <form
+      id="pass-form"
+      method="post"
+      action="{{ url_for('next_reveal', player_number=player_number) }}"
+      hidden
+    >
       <button type="submit">
         {% if player_number < total_players %}
           Hide and Pass to Next Player
