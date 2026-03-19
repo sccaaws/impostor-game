@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}Options{% endblock %}
+
+{% block content %}
+  <h1>Game Options</h1>
+  <p class="muted">Customize how the game behaves.</p>
+
+  <form method="post" class="stack">
+
+    <label>
+      <input type="checkbox" name="allow_self_vote"
+             {% if options.allow_self_vote %}checked{% endif %}>
+      Allow players to vote for themselves
+    </label>
+
+    <label>
+      <input type="checkbox" name="allow_skip_vote"
+             {% if options.allow_skip_vote %}checked{% endif %}>
+      Allow skipping votes
+    </label>
+
+    <label>
+      <input type="checkbox" name="impostor_guess"
+             {% if options.impostor_guess %}checked{% endif %}>
+      Allow impostor final guess
+    </label>
+
+    <div>
+      <label for="tie_breaker">Tie behavior</label>
+      <select name="tie_breaker" id="tie_breaker">
+        <option value="impostor_wins"
+          {% if options.tie_breaker == "impostor_wins" %}selected{% endif %}>
+          Impostor wins
+        </option>
+        <option value="revote"
+          {% if options.tie_breaker == "revote" %}selected{% endif %}>
+          Revote
+        </option>
+      </select>
+    </div>
+
+    <button type="submit" class="button-primary">Save Options</button>
+    <a href="{{ url_for('index') }}" class="link-button">Back</a>
+
+  </form>
+{% endblock %}

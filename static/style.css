@@ -575,3 +575,16 @@ button:active {
 .dark .moon-icon {
   opacity: 1;
 }
+
+.small-button {
+  width: auto;
+  min-height: 40px;
+  padding: 8px 12px;
+  font-size: 14px;
+}
+
+.theme-switch {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}

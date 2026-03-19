@@ -17,6 +17,18 @@ def load_words() -> dict:
 
 WORDS = load_words()
 
+def get_default_options():
+    return {
+        "allow_self_vote": False,
+        "allow_skip_vote": False,
+        "tie_breaker": "impostor_wins",  # or "revote"
+        "impostor_guess": True,
+    }
+
+
+def get_options():
+    return session.get("options", get_default_options())
+
 
 def get_categories() -> list[str]:
     return list(WORDS.keys())
@@ -611,6 +623,21 @@ def reset():
     session.pop("scoreboard", None)
     session.pop("used_words_by_key", None)
     return redirect(url_for("index"))
+
+@app.route("/options", methods=["GET", "POST"])
+def options():
+    if request.method == "POST":
+        options = {
+            "allow_self_vote": request.form.get("allow_self_vote") == "on",
+            "allow_skip_vote": request.form.get("allow_skip_vote") == "on",
+            "tie_breaker": request.form.get("tie_breaker", "impostor_wins"),
+            "impostor_guess": request.form.get("impostor_guess") == "on",
+        }
+
+        session["options"] = options
+        return redirect(url_for("index"))
+
+    return render_template("options.html", options=get_options())
 
 
 if __name__ == "__main__":
