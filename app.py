@@ -3,9 +3,10 @@ from collections import Counter
 from pathlib import Path
 import json
 import random
+import secrets
 
 app = Flask(__name__)
-app.secret_key = "change-this-secret-key"
+app.secret_key = secrets.token_hex(16)
 
 
 def load_words() -> dict:
