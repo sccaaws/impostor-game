@@ -33,9 +33,23 @@
 
   <div class="actions">
     <button id="reveal-button" type="button" onclick="toggleRole()">Reveal Role</button>
+
+    <form method="post" action="{{ url_for('next_reveal', player_number=player_number) }}">
+      <button type="submit">
+        {% if player_number < total_players %}
+          Hide and Pass to Next Player
+        {% else %}
+          Continue to Clue Round
+        {% endif %}
+      </button>
+    </form>
   </div>
 
-  <div id="role-card" class="card center" hidden>
+  <div
+    id="role-card"
+    class="card center reveal-card {% if is_impostor %}reveal-impostor{% else %}reveal-crewmate{% endif %}"
+    hidden
+  >
     {% if is_impostor %}
       <h2>You are the Impostor</h2>
       <p class="muted">You do not know the word. Listen closely to clues and try to blend in.</p>
@@ -45,14 +59,4 @@
       <p class="muted">Remember it and keep it secret.</p>
     {% endif %}
   </div>
-
-  <form method="post" action="{{ url_for('next_reveal', player_number=player_number) }}">
-    <button type="submit">
-      {% if player_number < total_players %}
-        Hide and Pass to Next Player
-      {% else %}
-        Continue to Clue Round
-      {% endif %}
-    </button>
-  </form>
 {% endblock %}
