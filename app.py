@@ -269,7 +269,13 @@ def lobby():
             player_names.append(name)
 
         session["cached_player_names"] = player_names
-        session["scoreboard"] = create_scoreboard(player_names)
+
+        existing_scoreboard = session.get("scoreboard")
+        existing_names = [stat["name"] for stat in existing_scoreboard["player_stats"]] if existing_scoreboard else None
+
+        if existing_names != player_names:
+            session["scoreboard"] = create_scoreboard(player_names)
+
         start_new_round(player_names, category, difficulty)
 
         session.pop("setup", None)
@@ -306,8 +312,15 @@ def play_again():
         return redirect(url_for("index"))
 
     player_names = [player["name"] for player in game["players"]]
-    category = game["category"]
-    difficulty = game["difficulty"]
+
+    category = request.form.get("category", game["category"])
+    difficulty = request.form.get("difficulty", game["difficulty"])
+
+    if category not in get_categories():
+        category = game["category"]
+
+    if difficulty not in get_difficulties():
+        difficulty = game["difficulty"]
 
     start_new_round(player_names, category, difficulty)
     return redirect(url_for("reveal", player_number=1))
@@ -675,6 +688,10 @@ def results():
         vote_result=game["vote_result"],
         players=game["players"],
         scoreboard=session.get("scoreboard"),
+        categories=get_categories(),
+        difficulties=get_difficulties(),
+        current_category=game["category"],
+        current_difficulty=game["difficulty"],
     )
 
 
@@ -682,7 +699,6 @@ def results():
 def reset():
     session.pop("game", None)
     session.pop("setup", None)
-    session.pop("scoreboard", None)
     session.pop("used_words_by_key", None)
     return redirect(url_for("index"))
 

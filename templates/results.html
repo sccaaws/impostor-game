@@ -76,9 +76,33 @@
 {% endif %}
 
   <div class="actions">
-    <form method="post" action="{{ url_for('play_again') }}">
-      <button type="submit" class="button-primary">Play Again</button>
-    </form>
+  <form method="post" action="{{ url_for('play_again') }}" class="stack">
+    <div>
+      <label for="category">Category</label>
+      <select id="category" name="category">
+        {% for category_name in categories %}
+          <option value="{{ category_name }}"
+            {% if category_name == current_category %}selected{% endif %}>
+            {{ category_name }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div>
+      <label for="difficulty">Difficulty</label>
+      <select id="difficulty" name="difficulty">
+        {% for difficulty_name in difficulties %}
+          <option value="{{ difficulty_name }}"
+            {% if difficulty_name == current_difficulty %}selected{% endif %}>
+            {{ difficulty_name|capitalize }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <button type="submit" class="button-primary">Play Again</button>
+  </form>
 
     <form method="post" action="{{ url_for('reset') }}">
       <button type="submit">Back to Setup</button>
