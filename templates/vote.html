@@ -5,17 +5,29 @@
 {% block content %}
   <span class="pill">Voter {{ voter_number }} of {{ total_players }}</span>
   <h1>{{ voter_name }}, cast your vote</h1>
-  <p class="muted">Choose who you think the impostor is. You cannot vote for yourself.</p>
+  <p class="muted">
+    Choose who you think the impostor is.
+    {% if not allow_self_vote %}
+      You cannot vote for yourself.
+    {% endif %}
+    {% if allow_skip_vote %}
+      You may also skip your vote.
+    {% endif %}
+  </p>
 
   {% if error %}
     <div class="error">{{ error }}</div>
   {% endif %}
 
-  <form method="post">
-    <div class="player-list">
-      {% for player in players %}
-        <button type="submit" name="voted_for" value="{{ player.id }}">{{ player.name }}</button>
-      {% endfor %}
-    </div>
-  </form>
+<form method="post">
+  <div class="player-list">
+    {% for player in players %}
+      <button type="submit" name="voted_for" value="{{ player.id }}">{{ player.name }}</button>
+    {% endfor %}
+
+    {% if allow_skip_vote %}
+      <button type="submit" name="voted_for" value="skip" class="button-secondary">Skip Vote</button>
+    {% endif %}
+  </div>
+</form>
 {% endblock %}

@@ -10,12 +10,19 @@
     <div class="word">{{ winner }}</div>
   </div>
 
-  {% if vote_result == 'tie' %}
-    <p class="error">The vote was tied, so the impostor survives and wins the round.</p>
-  {% elif vote_result == 'caught' %}
-    <p class="success">The group correctly found the impostor.</p>
+  {% if vote_result == 'caught' %}
+    <p class="success">The impostor was caught!</p>
+
   {% elif vote_result == 'missed' %}
     <p class="error">The group accused the wrong player.</p>
+
+  {% elif vote_result == 'tie' %}
+    <p class="error">The vote was tied, so the impostor survives and wins the round.</p>
+
+  {% elif vote_result == 'skipped' %}
+    <p class="error">
+      The group chose to skip the vote, so the impostor survives and wins the round.
+    </p>
   {% endif %}
 
   <div class="stack">

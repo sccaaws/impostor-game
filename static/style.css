@@ -103,7 +103,10 @@ body {
   animation: fadeUp 0.35s ease;
 }
 
-h1, h2, h3, p {
+h1,
+h2,
+h3,
+p {
   margin-top: 0;
 }
 
@@ -386,6 +389,7 @@ button:active {
     opacity: 0;
     transform: translateY(8px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -455,11 +459,25 @@ button:active {
     color: var(--muted);
   }
 
-  .stats-row div:nth-child(1)::before { content: "Player"; }
-  .stats-row div:nth-child(2)::before { content: "Wins"; }
-  .stats-row div:nth-child(3)::before { content: "Impostor"; }
-  .stats-row div:nth-child(4)::before { content: "Accused"; }
-  .stats-row div:nth-child(5)::before { content: "Correct Votes"; }
+  .stats-row div:nth-child(1)::before {
+    content: "Player";
+  }
+
+  .stats-row div:nth-child(2)::before {
+    content: "Wins";
+  }
+
+  .stats-row div:nth-child(3)::before {
+    content: "Impostor";
+  }
+
+  .stats-row div:nth-child(4)::before {
+    content: "Accused";
+  }
+
+  .stats-row div:nth-child(5)::before {
+    content: "Correct Votes";
+  }
 }
 
 @media (max-width: 420px) {
@@ -487,6 +505,7 @@ button:active {
     font-size: 1.45rem;
   }
 }
+
 .theme-switch {
   display: inline-flex;
   align-items: center;
@@ -587,4 +606,122 @@ button:active {
   display: flex;
   align-items: center;
   gap: 10px;
+}
+
+.option-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 0;
+}
+
+@media (max-width: 640px) {
+  .option-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+.option-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 0;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 58px;
+  height: 32px;
+  flex-shrink: 0;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+
+.slider {
+  position: absolute;
+  inset: 0;
+  background: #cbd5e1;
+  border-radius: 999px;
+  transition: background 0.25s ease;
+  cursor: pointer;
+}
+
+.slider::before {
+  content: "";
+  position: absolute;
+  height: 24px;
+  width: 24px;
+  left: 4px;
+  top: 4px;
+  background: white;
+  border-radius: 50%;
+  transition: transform 0.25s ease;
+}
+
+.switch input:checked+.slider {
+  background: var(--blue);
+}
+
+.switch input:checked+.slider::before {
+  transform: translateX(26px);
+}
+
+@media (max-width: 640px) {
+  .option-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+/* OFF state */
+.slider {
+  background: #ef4444;
+}
+
+/* ON state */
+.switch input:checked+.slider {
+  background: #16a34a;
+  /* green */
+}
+
+.alert-card {
+  border: 2px solid rgba(239, 68, 68, 0.5);
+  background: rgba(239, 68, 68, 0.08);
+  text-align: center;
+  animation: pulseFade 0.6s ease;
+}
+
+.alert-card h2 {
+  color: #ef4444;
+  margin-bottom: 8px;
+}
+
+.alert-card p {
+  margin: 4px 0;
+}
+
+@keyframes pulseFade {
+  0% {
+    transform: scale(0.98);
+    opacity: 0;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.alert-card {
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2),
+    0 8px 24px rgba(239, 68, 68, 0.15);
 }

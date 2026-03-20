@@ -400,6 +400,9 @@ def start_voting():
         return redirect(url_for("index"))
 
     game["current_vote"] = 1
+    game["accused_id"] = None
+    game["vote_result"] = None
+
     for player in game["players"]:
         player["vote"] = None
 
@@ -426,6 +429,7 @@ def vote_pass_screen(voter_number: int):
         voter_number=voter_number,
         voter_name=current_voter["name"],
         total_players=game["player_count"],
+        game=game,
     )
 
 
@@ -439,37 +443,47 @@ def vote(voter_number: int):
         return redirect(url_for("vote_pass_screen", voter_number=game["current_vote"]))
 
     current_voter = game["players"][voter_number - 1]
+    options = get_options()
+    allow_self_vote = options.get("allow_self_vote", False)
+    allow_skip_vote = options.get("allow_skip_vote", False)
 
     if request.method == "POST":
+        voted_for_raw = request.form.get("voted_for")
+
+        if allow_skip_vote and voted_for_raw == "skip":
+            return redirect(url_for("confirm_vote", voter_number=voter_number, voted_for="skip"))
+
         try:
-            voted_for = int(request.form["voted_for"])
-        except (KeyError, ValueError):
-            eligible_players = [
-                player
-                for player in game["players"]
-                if player["id"] != current_voter["id"]
-            ]
+            voted_for = int(voted_for_raw)
+        except (TypeError, ValueError):
+            eligible_players = (
+                game["players"]
+                if allow_self_vote
+                else [player for player in game["players"] if player["id"] != current_voter["id"]]
+            )
             return render_template(
                 "vote.html",
                 voter_number=voter_number,
                 voter_name=current_voter["name"],
                 total_players=game["player_count"],
                 players=eligible_players,
-                error="Choose a valid player.",
+                error="Choose a valid option.",
+                allow_self_vote=allow_self_vote,
+                allow_skip_vote=allow_skip_vote,
             )
 
-        valid_ids = {
-            player["id"]
-            for player in game["players"]
-            if player["id"] != current_voter["id"]
-        }
+        valid_ids = (
+            {player["id"] for player in game["players"]}
+            if allow_self_vote
+            else {player["id"] for player in game["players"] if player["id"] != current_voter["id"]}
+        )
 
         if voted_for not in valid_ids:
-            eligible_players = [
-                player
-                for player in game["players"]
-                if player["id"] != current_voter["id"]
-            ]
+            eligible_players = (
+                game["players"]
+                if allow_self_vote
+                else [player for player in game["players"] if player["id"] != current_voter["id"]]
+            )
             return render_template(
                 "vote.html",
                 voter_number=voter_number,
@@ -477,15 +491,17 @@ def vote(voter_number: int):
                 total_players=game["player_count"],
                 players=eligible_players,
                 error="You cannot vote for yourself.",
+                allow_self_vote=allow_self_vote,
+                allow_skip_vote=allow_skip_vote,
             )
 
-        return redirect(
-            url_for("confirm_vote", voter_number=voter_number, voted_for=voted_for)
-        )
+        return redirect(url_for("confirm_vote", voter_number=voter_number, voted_for=voted_for))
 
-    eligible_players = [
-        player for player in game["players"] if player["id"] != current_voter["id"]
-    ]
+    eligible_players = (
+        game["players"]
+        if allow_self_vote
+        else [player for player in game["players"] if player["id"] != current_voter["id"]]
+    )
 
     return render_template(
         "vote.html",
@@ -494,11 +510,12 @@ def vote(voter_number: int):
         total_players=game["player_count"],
         players=eligible_players,
         error=None,
+        allow_self_vote=allow_self_vote,
+        allow_skip_vote=allow_skip_vote,
     )
 
-
-@app.route("/confirm_vote/<int:voter_number>/<int:voted_for>", methods=["GET", "POST"])
-def confirm_vote(voter_number: int, voted_for: int):
+@app.route("/confirm_vote/<int:voter_number>/<voted_for>", methods=["GET", "POST"])
+def confirm_vote(voter_number: int, voted_for: str):
     game = get_game()
     if not game:
         return redirect(url_for("index"))
@@ -507,21 +524,33 @@ def confirm_vote(voter_number: int, voted_for: int):
         return redirect(url_for("vote_pass_screen", voter_number=game["current_vote"]))
 
     current_voter = game["players"][voter_number - 1]
-    valid_ids = {
-        player["id"]
-        for player in game["players"]
-        if player["id"] != current_voter["id"]
-    }
+    options = get_options()
+    allow_self_vote = options.get("allow_self_vote", False)
+    allow_skip_vote = options.get("allow_skip_vote", False)
 
-    if voted_for not in valid_ids:
-        return redirect(url_for("vote", voter_number=voter_number))
+    if voted_for == "skip":
+        if not allow_skip_vote:
+            return redirect(url_for("vote", voter_number=voter_number))
+        voted_player = None
+    else:
+        try:
+            voted_for_id = int(voted_for)
+        except ValueError:
+            return redirect(url_for("vote", voter_number=voter_number))
 
-    voted_player = next(
-        player for player in game["players"] if player["id"] == voted_for
-    )
+        valid_ids = (
+            {player["id"] for player in game["players"]}
+            if allow_self_vote
+            else {player["id"] for player in game["players"] if player["id"] != current_voter["id"]}
+        )
+
+        if voted_for_id not in valid_ids:
+            return redirect(url_for("vote", voter_number=voter_number))
+
+        voted_player = next(player for player in game["players"] if player["id"] == voted_for_id)
 
     if request.method == "POST":
-        game["players"][voter_number - 1]["vote"] = voted_for
+        game["players"][voter_number - 1]["vote"] = "skip" if voted_for == "skip" else int(voted_for)
         next_voter = voter_number + 1
         game["current_vote"] = next_voter
         session["game"] = game
@@ -536,6 +565,7 @@ def confirm_vote(voter_number: int, voted_for: int):
         voter_number=voter_number,
         voter_name=current_voter["name"],
         voted_player=voted_player,
+        voted_for=voted_for,
         total_players=game["player_count"],
     )
 
@@ -553,22 +583,53 @@ def count_votes():
         return redirect(url_for("vote_pass_screen", voter_number=1))
 
     top_votes = max(counts.values())
-    leaders = [player_id for player_id, count in counts.items() if count == top_votes]
+    leaders = [vote_value for vote_value, count in counts.items() if count == top_votes]
 
     if len(leaders) > 1:
+        options = get_options()
+        tie_breaker = options.get("tie_breaker", "impostor_wins")
+
+        if tie_breaker == "revote":
+            game["accused_id"] = None
+            game["vote_result"] = "tie_revote"
+            game["winner"] = None
+            game["current_vote"] = 1
+
+            for player in game["players"]:
+                player["vote"] = None
+
+            session["game"] = game
+            return redirect(url_for("vote_pass_screen", voter_number=1))
+
         game["accused_id"] = None
         game["vote_result"] = "tie"
         game["winner"] = "Impostor"
         session["game"] = game
         return redirect(url_for("results"))
 
-    accused_id = leaders[0]
+    winner_vote = leaders[0]
+
+    if winner_vote == "skip":
+        game["accused_id"] = None
+        game["vote_result"] = "skipped"
+        game["winner"] = "Impostor"
+        session["game"] = game
+        return redirect(url_for("results"))
+
+    accused_id = winner_vote
     game["accused_id"] = accused_id
     game["vote_result"] = "caught" if accused_id == game["impostor_id"] else "missed"
     session["game"] = game
 
     if accused_id == game["impostor_id"]:
-        return redirect(url_for("guess_word"))
+        options = get_options()
+
+        if options.get("impostor_guess", True):
+            return redirect(url_for("guess_word"))
+
+        game["winner"] = "Crewmates"
+        session["game"] = game
+        return redirect(url_for("results"))
 
     game["winner"] = "Impostor"
     session["game"] = game
@@ -581,14 +642,16 @@ def guess_word():
     if not game:
         return redirect(url_for("index"))
 
+    options = get_options()
+    if not options.get("impostor_guess", True):
+        return redirect(url_for("results"))
+
     if game.get("vote_result") != "caught":
         return redirect(url_for("results"))
 
     if request.method == "POST":
         guess = request.form.get("guess", "").strip().lower()
-        game["winner"] = (
-            "Impostor" if guess == game["secret_word"].lower() else "Crewmates"
-        )
+        game["winner"] = "Impostor" if guess == game["secret_word"].lower() else "Crewmates"
         session["game"] = game
         return redirect(url_for("results"))
 

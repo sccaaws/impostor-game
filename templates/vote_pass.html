@@ -9,6 +9,14 @@
     <p class="muted">Hand the device to the next voter without letting anyone else look.</p>
   </div>
 
+  {% if game.vote_result == 'tie_revote' %}
+    <div class="card alert-card">
+      <h2>⚠ Revote Required</h2>
+      <p>The previous vote ended in a tie.</p>
+      <p><strong>All players must vote again.</strong></p>
+    </div>
+  {% endif %}
+
   <div class="card center">
     <h2>{{ voter_name }}, get ready to vote</h2>
     <p class="muted">

@@ -6,25 +6,61 @@
   <h1>Game Options</h1>
   <p class="muted">Customize how the game behaves.</p>
 
+  <div class="option-row">
+    <div>
+      <h3>Appearance</h3>
+      <p class="muted">Switch between light and dark mode.</p>
+    </div>
+
+    <div class="theme-switch">
+      <span class="theme-switch-label" id="theme-label">Light Mode</span>
+
+      <button type="button" class="theme-switch-track" onclick="toggleTheme()" aria-label="Toggle dark mode">
+        <span class="theme-switch-thumb">
+          <span class="theme-icon sun-icon">💡</span>
+          <span class="theme-icon moon-icon">🌙</span>
+        </span>
+      </button>
+    </div>
+  </div>
+
   <form method="post" class="stack">
 
-    <label>
-      <input type="checkbox" name="allow_self_vote"
-             {% if options.allow_self_vote %}checked{% endif %}>
-      Allow players to vote for themselves
-    </label>
+    <div class="option-row">
+      <div>
+        <h3>Allow Self Vote</h3>
+        <p class="muted">Players can vote for themselves.</p>
+      </div>
+      <label class="switch">
+        <input type="checkbox" name="allow_self_vote"
+               {% if options.allow_self_vote %}checked{% endif %}>
+        <span class="slider"></span>
+      </label>
+    </div>
 
-    <label>
-      <input type="checkbox" name="allow_skip_vote"
-             {% if options.allow_skip_vote %}checked{% endif %}>
-      Allow skipping votes
-    </label>
+    <div class="option-row">
+      <div>
+        <h3>Allow Skip Vote</h3>
+        <p class="muted">Players can choose to skip voting.</p>
+      </div>
+      <label class="switch">
+        <input type="checkbox" name="allow_skip_vote"
+               {% if options.allow_skip_vote %}checked{% endif %}>
+        <span class="slider"></span>
+      </label>
+    </div>
 
-    <label>
-      <input type="checkbox" name="impostor_guess"
-             {% if options.impostor_guess %}checked{% endif %}>
-      Allow impostor final guess
-    </label>
+    <div class="option-row">
+      <div>
+        <h3>Impostor Final Guess</h3>
+        <p class="muted">Allow the impostor to guess the word after being caught.</p>
+      </div>
+      <label class="switch">
+        <input type="checkbox" name="impostor_guess"
+               {% if options.impostor_guess %}checked{% endif %}>
+        <span class="slider"></span>
+      </label>
+    </div>
 
     <div>
       <label for="tie_breaker">Tie behavior</label>

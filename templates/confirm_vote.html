@@ -9,8 +9,13 @@
   </div>
 
   <div class="card center">
-    <p class="muted">You selected:</p>
-    <div class="word">{{ voted_player.name }}</div>
+    {% if voted_for == "skip" %}
+      <p class="muted">You selected:</p>
+      <div class="word">Skip Vote</div>
+    {% else %}
+      <p class="muted">You selected:</p>
+      <div class="word">{{ voted_player.name }}</div>
+    {% endif %}
   </div>
 
   <div class="actions">
