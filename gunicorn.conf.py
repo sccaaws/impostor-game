@@ -1,5 +1,5 @@
 # gunicorn.conf.py
-bind = '0.0.0.0:5000'
+bind = "0.0.0.0:5000"
 workers = 3
-timeout = 60 # seconds
-loglevel = 'info'
+timeout = 60  # seconds
+loglevel = "info"

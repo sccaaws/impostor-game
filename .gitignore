@@ -1,4 +1,6 @@
-__pycache__
+__pycache__/
 venv/
 Makefile
 gunicorn.ctl
+app.py.old
+*.pyc
