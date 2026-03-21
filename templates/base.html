@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}Impostor Game{% endblock %}</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
   <script>
     function updateThemeLabel() {
       const themeLabel = document.getElementById("theme-label");
@@ -37,10 +38,23 @@
 </head>
 <body>
   <div class="page-shell">
-    <div class="topbar">
-      <a href="{{ url_for('options') }}" class="link-button small-button">⚙</a>
+    <div class="app-header">
+      <img
+        src="{{ url_for('static', filename='logo2.png') }}"
+        class="app-logo"
+        alt="Impostor Game logo"
+        width="300px"
+        height="30px"
+      >
+      <div class="app-title-group">
+        <h1 class="app-title">Impostor Game</h1>
+        <p class="app-subtitle">A social deduction party game</p>
+      </div>
     </div>
 
+    <div class="topbar">
+      <a href="{{ url_for('options') }}" class="icon-button" aria-label="Options">⚙</a>
+    </div>
 
     <div class="container">
       {% block content %}{% endblock %}
