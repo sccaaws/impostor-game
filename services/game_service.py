@@ -52,16 +52,14 @@ def create_game(player_names: list[str], category: str, difficulty: str) -> dict
     }
 
 
-def start_new_round(player_names: list[str], category: str, difficulty: str):
+def start_new_round(player_names: list[str], category: str, difficulty: str, rotate: bool = False):
     options = get_options()
-    existing_game = session.get("game")
 
-    if existing_game and options.get("rotate_players", True):
+    if rotate and options.get("rotate_players", True):
         player_names = rotate_player_names(player_names)
 
     game = create_game(player_names, category, difficulty)
     session["game"] = game
-    session["last_player_order"] = [player["name"] for player in game["players"]]
 
     scoreboard = session.get("scoreboard")
     if scoreboard:

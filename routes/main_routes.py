@@ -88,7 +88,7 @@ def register_routes(app):
             if existing_names != player_names:
                 session["scoreboard"] = create_scoreboard(player_names)
 
-            start_new_round(player_names, category, difficulty)
+            start_new_round(player_names, category, difficulty, rotate=False)
 
             session.pop("setup", None)
             return redirect(url_for("reveal", player_number=1))
@@ -132,7 +132,7 @@ def register_routes(app):
         if difficulty not in get_difficulties():
             difficulty = game["difficulty"]
 
-        start_new_round(player_names, category, difficulty)
+        start_new_round(player_names, category, difficulty, rotate=True)
         return redirect(url_for("reveal", player_number=1))
 
     @app.route("/reveal/<int:player_number>")
