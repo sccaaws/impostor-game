@@ -725,3 +725,32 @@ button:active {
   box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2),
     0 8px 24px rgba(239, 68, 68, 0.15);
 }
+
+.scoreboard-panel {
+  margin-top: 20px;
+}
+
+.scoreboard-toggle {
+  list-style: none;
+  cursor: pointer;
+  font-weight: 700;
+  background: var(--blue);
+  color: white;
+  padding: 14px 16px;
+  border-radius: 12px;
+  text-align: center;
+  user-select: none;
+}
+
+.scoreboard-toggle::-webkit-details-marker {
+  display: none;
+}
+
+.scoreboard-panel[open] .scoreboard-toggle {
+  background: var(--blue-dark);
+  margin-bottom: 12px;
+}
+
+.scoreboard-card {
+  margin-top: 12px;
+}
