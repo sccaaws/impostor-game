@@ -556,6 +556,7 @@ def register_routes(app):
                 "allow_skip_vote": request.form.get("allow_skip_vote") == "on",
                 "tie_breaker": request.form.get("tie_breaker", "impostor_wins"),
                 "impostor_guess": request.form.get("impostor_guess") == "on",
+                "rotate_players": request.form.get("rotate_players") == "on"
             }
 
             session["options"] = options

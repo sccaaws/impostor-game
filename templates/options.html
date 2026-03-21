@@ -52,6 +52,18 @@
 
     <div class="option-row">
       <div>
+        <h3>Rotate Players Each Round</h3>
+        <p class="muted">Change the passing order so a different player starts each round.</p>
+      </div>
+      <label class="switch">
+        <input type="checkbox" name="rotate_players"
+              {% if options.rotate_players %}checked{% endif %}>
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="option-row">
+      <div>
         <h3>Impostor Final Guess</h3>
         <p class="muted">Allow the impostor to guess the word after being caught.</p>
       </div>

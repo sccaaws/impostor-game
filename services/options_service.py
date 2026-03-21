@@ -7,6 +7,7 @@ def get_default_options():
         "allow_skip_vote": False,
         "tie_breaker": "impostor_wins",
         "impostor_guess": True,
+        "rotate_players": True
     }
 
 

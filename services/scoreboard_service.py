@@ -8,14 +8,13 @@ def create_scoreboard(player_names: list[str]) -> dict:
         "impostor_wins": 0,
         "player_stats": [
             {
-                "id": i + 1,
-                "name": player_names[i],
+                "name": name,
                 "wins": 0,
                 "times_impostor": 0,
                 "times_accused": 0,
                 "correct_votes": 0,
             }
-            for i in range(len(player_names))
+            for name in player_names
         ],
     }
 
@@ -35,30 +34,42 @@ def update_scoreboard_if_needed(game: dict):
     elif game["winner"] == "Impostor":
         scoreboard["impostor_wins"] += 1
 
-    impostor_id = game["impostor_id"]
-    accused_id = game.get("accused_id")
+    impostor_player = game["players"][game["impostor_id"] - 1]
+    impostor_name = impostor_player["name"]
 
+    accused_id = game.get("accused_id")
+    accused_name = None
     if accused_id is not None:
+        accused_name = next(
+            (player["name"] for player in game["players"] if player["id"] == accused_id),
+            None
+        )
+
+    # Track accusations by player name
+    if accused_name is not None:
         for stat in scoreboard["player_stats"]:
-            if stat["id"] == accused_id:
+            if stat["name"] == accused_name:
                 stat["times_accused"] += 1
                 break
 
+    # Track correct votes by voter name
     for player in game["players"]:
-        if player.get("vote") == impostor_id:
+        voted_for = player.get("vote")
+        if voted_for == game["impostor_id"]:
             for stat in scoreboard["player_stats"]:
-                if stat["id"] == player["id"]:
+                if stat["name"] == player["name"]:
                     stat["correct_votes"] += 1
                     break
 
+    # Track wins by player name
     if game["winner"] == "Impostor":
         for stat in scoreboard["player_stats"]:
-            if stat["id"] == impostor_id:
+            if stat["name"] == impostor_name:
                 stat["wins"] += 1
                 break
     elif game["winner"] == "Crewmates":
         for stat in scoreboard["player_stats"]:
-            if stat["id"] != impostor_id:
+            if stat["name"] != impostor_name:
                 stat["wins"] += 1
 
     session["scoreboard"] = scoreboard

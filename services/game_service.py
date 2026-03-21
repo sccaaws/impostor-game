@@ -1,6 +1,12 @@
 from flask import session
 import random
 from services.words_service import choose_secret_word
+from services.options_service import get_options
+
+def rotate_player_names(player_names: list[str]) -> list[str]:
+    if len(player_names) <= 1:
+        return player_names
+    return player_names[1:] + [player_names[0]]
 
 
 def default_player_names(player_count: int) -> list[str]:
@@ -47,13 +53,21 @@ def create_game(player_names: list[str], category: str, difficulty: str) -> dict
 
 
 def start_new_round(player_names: list[str], category: str, difficulty: str):
+    options = get_options()
+    existing_game = session.get("game")
+
+    if existing_game and options.get("rotate_players", True):
+        player_names = rotate_player_names(player_names)
+
     game = create_game(player_names, category, difficulty)
     session["game"] = game
+    session["last_player_order"] = [player["name"] for player in game["players"]]
 
     scoreboard = session.get("scoreboard")
     if scoreboard:
+        impostor_name = game["players"][game["impostor_id"] - 1]["name"]
         for player in scoreboard["player_stats"]:
-            if player["id"] == game["impostor_id"]:
+            if player["name"] == impostor_name:
                 player["times_impostor"] += 1
                 break
         session["scoreboard"] = scoreboard
