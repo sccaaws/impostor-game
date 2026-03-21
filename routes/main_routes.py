@@ -516,7 +516,8 @@ def register_routes(app):
             session["game"] = game
             return redirect(url_for("results"))
 
-        return render_template("guess.html")
+        impostor_name = game["players"][game["impostor_id"] - 1]["name"]
+        return render_template("guess.html", impostor_name=impostor_name)
 
     @app.route("/results")
     def results():

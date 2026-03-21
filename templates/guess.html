@@ -3,14 +3,25 @@
 {% block title %}Impostor Guess{% endblock %}
 
 {% block content %}
-  <h1>Impostor Final Guess</h1>
-  <p class="muted">The impostor was found. They get one last chance to guess the word.</p>
+  <div class="center">
+    <h1>Impostor Final Guess</h1>
+    <p class="muted">Pass the device to:</p>
+  </div>
+
+  <div class="card center pass-highlight-card">
+    <div class="pass-player-label">Impostor</div>
+    <div class="pass-player-name">{{ impostor_name }}</div>
+  </div>
+
+  <div class="center">
+    <p class="muted">{{ impostor_name }} gets one last chance to guess the secret word.</p>
+  </div>
 
   <form method="post" class="stack">
     <div>
       <label for="guess">Secret word guess</label>
       <input id="guess" type="text" name="guess" placeholder="Enter the secret word" required>
     </div>
-    <button type="submit">Submit Guess</button>
+    <button type="submit" class="button-primary">Submit Guess</button>
   </form>
 {% endblock %}
