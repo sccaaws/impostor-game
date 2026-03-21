@@ -754,3 +754,32 @@ button:active {
 .scoreboard-card {
   margin-top: 12px;
 }
+
+.pass-highlight-card {
+  border-width: 2px;
+  border-color: var(--blue);
+  box-shadow: var(--shadow-strong);
+}
+
+.pass-player-label {
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+
+.pass-player-name {
+  font-size: 2.2rem;
+  font-weight: 800;
+  line-height: 1.1;
+  color: var(--blue);
+  word-break: break-word;
+}
+
+@media (max-width: 640px) {
+  .pass-player-name {
+    font-size: 1.8rem;
+  }
+}
