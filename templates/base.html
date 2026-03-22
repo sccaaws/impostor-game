@@ -39,21 +39,21 @@
 <body>
   <div class="page-shell">
     <div class="app-header">
-      <img
-        src="{{ url_for('static', filename='logo.png') }}"
-        class="app-logo"
-        alt="Impostor Game logo"
-        width="300px"
-        height="30px"
-      >
-      <div class="app-title-group">
-        <h1 class="app-title">Impostor Game</h1>
-        <p class="app-subtitle">A social deduction party game</p>
+      <div class="app-header-left">
+        <img
+          src="{{ url_for('static', filename='logo.png') }}"
+          class="app-logo"
+          alt="Impostor Game logo"
+        >
+        <div class="app-title-group">
+          <h1 class="app-title">Impostor Game</h1>
+          <p class="app-subtitle">A social deduction party game</p>
+        </div>
       </div>
-    </div>
 
-    <div class="topbar">
-      <a href="{{ url_for('options') }}" class="icon-button" aria-label="Options">⚙</a>
+      <a href="{{ url_for('options') }}" class="header-options-button">
+        ⚙ <span>Options</span>
+      </a>
     </div>
 
     <div class="container">

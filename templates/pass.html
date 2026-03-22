@@ -4,16 +4,13 @@
 
 {% block content %}
   <div class="center">
+    <span class="pill">Next Player</span>
     <h1>Pass the Device</h1>
-    <p class="muted">Give the device to:</p>
+    <p class="muted">Hand the device to the next player without letting anyone else look.</p>
   </div>
 
-  <div class="card center pass-highlight-card">
-    <div class="pass-player-label">Next Player</div>
-    <div class="pass-player-name">{{ player_name }}</div>
-  </div>
-
-  <div class="center">
+  <div class="card center">
+    <div class="word">{{ player_name }}</div>
     <p class="muted">When only {{ player_name }} can see the screen, continue.</p>
   </div>
 

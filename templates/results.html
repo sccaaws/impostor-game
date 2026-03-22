@@ -3,143 +3,136 @@
 {% block title %}Results{% endblock %}
 
 {% block content %}
-  <h1>Round Results</h1>
-
-  <div class="card">
+  <div class="card center result-card {% if winner == 'Crewmates' %}result-win{% else %}result-loss{% endif %}">
     <div class="muted">Winner</div>
-    <div class="word">{{ winner }}</div>
+    <div class="word">
+      {% if winner == 'Impostor' %}
+        {{ winner }}
+        {% for player in players %}
+          {% if player.id == impostor_id %}
+            ({{ player.name }})
+          {% endif %}
+        {% endfor %}
+      {% else %}
+        {{ winner }}
+      {% endif %}
+    </div>
   </div>
 
-  {% if vote_result == 'caught' %}
-    <p class="success">The impostor was caught!</p>
+  <div class="card result-message-card">
+    {% if vote_result == 'caught' %}
+      <p class="success">The impostor was caught.</p>
 
-  {% elif vote_result == 'missed' %}
-    <p class="error">The group accused the wrong player.</p>
+    {% elif vote_result == 'missed' %}
+      <p class="error">The group accused the wrong player.</p>
 
-  {% elif vote_result == 'tie' %}
-    <p class="error">The vote was tied, so the impostor survives and wins the round.</p>
+    {% elif vote_result == 'tie' %}
+      <p class="error">The vote was tied, so the impostor survives and wins the round.</p>
 
-  {% elif vote_result == 'skipped' %}
-    <p class="error">
-      The group chose to skip the vote, so the impostor survives and wins the round.
-    </p>
-  {% endif %}
+    {% elif vote_result == 'skipped' %}
+      <p class="error">The group chose to skip the vote, so the impostor survives and wins the round.</p>
+    {% endif %}
+  </div>
 
-  <div class="stack">
-    <div><strong>Secret word:</strong> {{ secret_word }}</div>
+  <div class="card result-details-card">
+    <div class="result-detail-row">
+      <span class="result-detail-label">Secret word</span>
+      <span class="result-detail-value">{{ secret_word }}</span>
+    </div>
 
-    {% for player in players %}
-      {% if player.id == impostor_id %}
-        <div><strong>Impostor:</strong> {{ player.name }}</div>
-      {% endif %}
-    {% endfor %}
+    {% if winner == 'Crewmates' %}
+      {% for player in players %}
+        {% if player.id == impostor_id %}
+          <div class="result-detail-row">
+            <span class="result-detail-label">Impostor</span>
+            <span class="result-detail-value">{{ player.name }}</span>
+          </div>
+        {% endif %}
+      {% endfor %}
+    {% endif %}
 
     {% if accused_id %}
       {% for player in players %}
         {% if player.id == accused_id %}
-          <div><strong>Accused player:</strong> {{ player.name }}</div>
+          <div class="result-detail-row">
+            <span class="result-detail-label">Accused player</span>
+            <span class="result-detail-value">{{ player.name }}</span>
+          </div>
         {% endif %}
       {% endfor %}
     {% endif %}
   </div>
 
-<!-- {% if scoreboard %}
-  <div class="card {% if winner == 'Crewmates' %}result-win{% else %}result-loss{% endif %}">
-    <h2>Scoreboard</h2>
-    <div class="stack">
-      <div><strong>Rounds played:</strong> {{ scoreboard.rounds_played }}</div>
-      <div><strong>Crewmate wins:</strong> {{ scoreboard.crewmate_wins }}</div>
-      <div><strong>Impostor wins:</strong> {{ scoreboard.impostor_wins }}</div>
-    </div>
-
-    <h3 class="mobile-section-title">Player Stats</h3>
-    <div class="stats-table">
-      <div class="stats-row stats-header">
-        <div>Player</div>
-        <div>Wins</div>
-        <div>Impostor</div>
-        <div>Accused</div>
-        <div>Correct Votes</div>
-      </div>
-
-      {% for stat in scoreboard.player_stats %}
-        <div class="stats-row">
-          <div>{{ stat.name }}</div>
-          <div>{{ stat.wins }}</div>
-          <div>{{ stat.times_impostor }}</div>
-          <div>{{ stat.times_accused }}</div>
-          <div>{{ stat.correct_votes }}</div>
-        </div>
-      {% endfor %}
-    </div>
-  </div>
-{% endif %} -->
-  <details class="scoreboard-panel">
-    <summary class="scoreboard-toggle">Show Scoreboard</summary>
-
-    <div class="card scoreboard-card">
-      <h2>Scoreboard</h2>
-
-      <div class="stack">
-        <div><strong>Rounds played:</strong> {{ scoreboard.rounds_played }}</div>
-        <div><strong>Crewmate wins:</strong> {{ scoreboard.crewmate_wins }}</div>
-        <div><strong>Impostor wins:</strong> {{ scoreboard.impostor_wins }}</div>
-      </div>
-
-      <h3 class="mobile-section-title">Player Stats</h3>
-      <div class="stats-table">
-        <div class="stats-row stats-header">
-          <div>Player</div>
-          <div>Wins</div>
-          <div>Impostor</div>
-          <div>Accused</div>
-          <div>Correct Votes</div>
+  <div class="result-actions">
+    <form method="post" action="{{ url_for('play_again') }}" class="stack compact-form">
+      <div class="form-row">
+        <div class="form-field">
+          <label for="category">Category</label>
+          <select id="category" name="category">
+            {% for category_name in categories %}
+              <option value="{{ category_name }}"
+                {% if category_name == current_category %}selected{% endif %}>
+                {{ category_name }}
+              </option>
+            {% endfor %}
+          </select>
         </div>
 
-        {% for stat in scoreboard.player_stats %}
-          <div class="stats-row">
-            <div>{{ stat.name }}</div>
-            <div>{{ stat.wins }}</div>
-            <div>{{ stat.times_impostor }}</div>
-            <div>{{ stat.times_accused }}</div>
-            <div>{{ stat.correct_votes }}</div>
-          </div>
-        {% endfor %}
+        <div class="form-field">
+          <label for="difficulty">Difficulty</label>
+          <select id="difficulty" name="difficulty">
+            {% for difficulty_name in difficulties %}
+              <option value="{{ difficulty_name }}"
+                {% if difficulty_name == current_difficulty %}selected{% endif %}>
+                {{ difficulty_name|capitalize }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
       </div>
-    </div>
-  </details>
 
-  <div class="actions">
-  <form method="post" action="{{ url_for('play_again') }}" class="stack">
-    <div>
-      <label for="category">Category</label>
-      <select id="category" name="category">
-        {% for category_name in categories %}
-          <option value="{{ category_name }}"
-            {% if category_name == current_category %}selected{% endif %}>
-            {{ category_name }}
-          </option>
-        {% endfor %}
-      </select>
-    </div>
-
-    <div>
-      <label for="difficulty">Difficulty</label>
-      <select id="difficulty" name="difficulty">
-        {% for difficulty_name in difficulties %}
-          <option value="{{ difficulty_name }}"
-            {% if difficulty_name == current_difficulty %}selected{% endif %}>
-            {{ difficulty_name|capitalize }}
-          </option>
-        {% endfor %}
-      </select>
-    </div>
-
-    <button type="submit" class="button-primary">Play Again</button>
-  </form>
+      <button type="submit" class="button-primary compact-button">Play Again</button>
+    </form>
 
     <form method="post" action="{{ url_for('reset') }}">
-      <button type="submit">Back to Setup</button>
+      <button type="submit" class="button-secondary compact-button">Back to Setup</button>
     </form>
   </div>
+
+  {% if scoreboard %}
+    <details class="scoreboard-panel">
+      <summary class="scoreboard-toggle compact-toggle">Show Scoreboard</summary>
+
+      <div class="card scoreboard-card">
+        <h2>Scoreboard</h2>
+
+        <div class="stack">
+          <div><strong>Rounds played:</strong> {{ scoreboard.rounds_played }}</div>
+          <div><strong>Crewmate wins:</strong> {{ scoreboard.crewmate_wins }}</div>
+          <div><strong>Impostor wins:</strong> {{ scoreboard.impostor_wins }}</div>
+        </div>
+
+        <h3 class="mobile-section-title">Player Stats</h3>
+        <div class="stats-table">
+          <div class="stats-row stats-header">
+            <div>Player</div>
+            <div>Wins</div>
+            <div>Impostor</div>
+            <div>Accused</div>
+            <div>Correct Votes</div>
+          </div>
+
+          {% for stat in scoreboard.player_stats %}
+            <div class="stats-row">
+              <div>{{ stat.name }}</div>
+              <div>{{ stat.wins }}</div>
+              <div>{{ stat.times_impostor }}</div>
+              <div>{{ stat.times_accused }}</div>
+              <div>{{ stat.correct_votes }}</div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </details>
+  {% endif %}
 {% endblock %}

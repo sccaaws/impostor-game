@@ -1,30 +1,28 @@
 {% extends "base.html" %}
 
-{% block title %}Pass to Voter{% endblock %}
+{% block title %}Pass the Device{% endblock %}
 
 {% block content %}
   <div class="center">
-    <span class="pill">Voting</span>
+    <span class="pill">Pass To</span>
     <h1>Pass the Device</h1>
     <p class="muted">Hand the device to the next voter without letting anyone else look.</p>
+
+    {% if game.vote_result == 'tie_revote' %}
+      <div class="card alert-card">
+        <h2>⚠ Revote Required</h2>
+        <p>The previous vote ended in a tie.</p>
+        <p><strong>All players must vote again.</strong></p>
+      </div>
+    {% endif %}
   </div>
 
-  {% if game.vote_result == 'tie_revote' %}
-    <div class="card alert-card">
-      <h2>⚠ Revote Required</h2>
-      <p>The previous vote ended in a tie.</p>
-      <p><strong>All players must vote again.</strong></p>
-    </div>
-  {% endif %}
-
   <div class="card center">
-    <h2>{{ voter_name }}, get ready to vote</h2>
-    <p class="muted">
-      When only you can see the screen, tap the button below.
-    </p>
+    <div class="word">{{ voter_name }}</div>
+    <p class="muted">When only {{ voter_name }} can see the screen, continue.</p>
   </div>
 
   <form method="get" action="{{ url_for('vote', voter_number=voter_number) }}">
-    <button type="submit" class="button-primary">I'm Ready to Vote</button>
+    <button type="submit" class="button-primary">Continue to Vote</button>
   </form>
 {% endblock %}
